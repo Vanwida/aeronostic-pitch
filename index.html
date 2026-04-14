@@ -196,6 +196,37 @@
   .tier-note { font-size: 12px; color: var(--text-faint); line-height: 1.4; }
   .tier-note strong { color: var(--accent); }
 
+  /* Deep explainer */
+  .deep { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .deep-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+  }
+  .deep-block h3 {
+    font-size: 14px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--accent-border);
+  }
+  ul.plain { list-style: none; }
+  ul.plain li {
+    font-size: 13px;
+    color: var(--text-muted);
+    padding: 5px 0 5px 14px;
+    position: relative;
+    line-height: 1.5;
+  }
+  ul.plain li::before {
+    content: "·";
+    position: absolute;
+    left: 2px;
+    color: var(--accent);
+    font-weight: 700;
+  }
+
   /* Caso ejemplo */
   .case-steps { display: grid; gap: 10px; }
   .case-step {
@@ -270,13 +301,20 @@
 <main class="wrap">
 
   <div class="label">Aeronostic · Modelo</div>
-  <h1>Captura, etiqueta, entrena, entrega.</h1>
-  <p class="lead">Montamos una plataforma que convierte vuelos de dron en modelos de IA para el cliente. Alrededor, dos vías para mover datos y clientes hacia ese core: vuelos propios y alianzas con operadoras UAS.</p>
+  <h1>Inspecciones con dron + IA que detectan y avisan.</h1>
+  <p class="lead">Ayudamos a los dueños de instalaciones grandes (plantas solares, parques, infraestructura) a saber en qué estado están sus activos, qué falla y dónde, sin que tengan que montar un equipo técnico para conseguirlo.</p>
 
   <section>
-    <h2>La idea base</h2>
+    <h2>El problema del cliente</h2>
     <div class="idea">
-      El <strong>core</strong> es una plataforma que entrena un modelo de visión por cliente a partir de sus vuelos. Los datos y los primeros clientes entran por dos vías: <strong>vuelos que hacemos nosotros</strong> y <strong>alianzas con operadoras UAS</strong> — empresas que ya tienen pilotos y flota, con las que colaboramos en vez de gestionar pilotos uno a uno.
+      Un parque solar de 50–100 MW puede estar perdiendo <strong>1–5% de su producción anual</strong> por defectos que no se detectan a tiempo: paneles dañados, suciedad, conexiones mal, hotspots. Las inspecciones manuales hoy son <strong>lentas (semanas), caras, y se entregan en un PDF genérico</strong> que tampoco sirve para seguir la evolución. El dueño no tiene equipo propio para automatizar esto.
+    </div>
+  </section>
+
+  <section>
+    <h2>Qué hacemos nosotros</h2>
+    <div class="idea">
+      <strong>Volamos con dron</strong> (nosotros o una operadora aliada), <strong>una IA entrenada por nosotros detecta los defectos</strong> uno a uno, y entregamos un <strong>informe accionable</strong> con la localización exacta de cada problema y cuánto dinero se está perdiendo. Cada vuelo mejora el sistema: a más vuelos sobre el mismo activo, mejor detecta.
     </div>
   </section>
 
@@ -358,35 +396,72 @@
   </section>
 
   <section>
-    <h2>Qué recibe el cliente (y cómo cobramos)</h2>
-    <p style="margin-bottom:16px; font-size:14px;">Tres niveles de entrega. El cliente elige según cuánta independencia quiere. Nuestro recurring vive en el nivel 2.</p>
+    <h2>Cómo lo contratan</h2>
+    <p style="margin-bottom:16px; font-size:14px;">Tres formas de trabajar con nosotros según lo metidos que quieran estar. La inmensa mayoría vive en la segunda.</p>
     <div class="tiers">
       <div class="tier">
         <div class="tier-head">
           <span class="tier-num">01</span>
-          <h3>Informe puntual</h3>
+          <h3>Inspección puntual</h3>
         </div>
-        <p class="tier-desc">Un vuelo, un PDF con defectos localizados y sus fotos. Acceso web para consultarlo.</p>
-        <div class="tier-pay">Pago único por vuelo</div>
-        <div class="tier-note">Útil para probarnos. No hay vínculo continuo.</div>
+        <p class="tier-desc">Nos contratan una vez para ver cómo está su activo. Hacemos un vuelo, entregamos informe. Sin compromiso después.</p>
+        <div class="tier-pay">Pago único por trabajo</div>
+        <div class="tier-note">Típico primer contacto. Si les gusta, suben al nivel siguiente.</div>
       </div>
       <div class="tier highlight">
         <div class="tier-head">
           <span class="tier-num">02</span>
-          <h3>Acceso continuo (API / web)</h3>
+          <h3>Seguimiento continuo</h3>
         </div>
-        <p class="tier-desc">El cliente nos contrata el vuelo o sube uno hecho por su operador. Nosotros hospedamos el modelo, lo mejoramos con cada vuelo, mantenemos histórico y comparativas.</p>
-        <div class="tier-pay">Cuota mensual o por imagen procesada</div>
-        <div class="tier-note"><strong>Aquí vive el recurring.</strong> El cliente no tiene el modelo en su mano — lo usa a través nuestro.</div>
+        <p class="tier-desc">Nos convertimos en su proveedor fijo de inspección. Volamos cada X meses (o vuela su operador y nosotros procesamos). Ven la evolución del activo en una web, reciben alertas cuando aparece algo nuevo, y comparativas entre vuelos.</p>
+        <div class="tier-pay">Cuota mensual o por vuelo procesado</div>
+        <div class="tier-note"><strong>Aquí está el negocio recurrente.</strong> Ellos quieren tranquilidad de que alguien mira el activo; nosotros tenemos ingresos estables.</div>
       </div>
       <div class="tier">
         <div class="tier-head">
           <span class="tier-num">03</span>
           <h3>Licencia del modelo</h3>
         </div>
-        <p class="tier-desc">Exportamos el modelo (ONNX / TFLite) para que lo usen por su cuenta en su dron o servidor, sin depender de nosotros.</p>
-        <div class="tier-pay">Pago grande one-time + renovación anual</div>
-        <div class="tier-note">Solo para enterprise que lo pida. Perdemos los datos de sus vuelos → precio alto para compensar.</div>
+        <p class="tier-desc">Empresas grandes con equipo técnico propio que quieren correr la detección en sus propios servidores, sin depender de nosotros. Les entregamos el modelo entrenado para su uso interno.</p>
+        <div class="tier-pay">Cuota grande anual</div>
+        <div class="tier-note">Poco común. Solo tiene sentido si el cliente es muy grande y tiene capacidad técnica para integrarlo.</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Seguimiento continuo — nuestro core</h2>
+    <p style="margin-bottom:20px; font-size:14px;">Esta es la parte que más vale la pena entender. Un cliente no compra "una inspección" — compra <strong style="color:var(--accent);">saber cómo evoluciona su activo en el tiempo</strong>. Por eso el modelo recurrente es tan distinto al one-shot.</p>
+
+    <div class="deep">
+      <div class="deep-block">
+        <h3>Por qué lo quieren</h3>
+        <ul class="plain">
+          <li>Un defecto no es una foto, es una evolución. Un hotspot pequeño hoy puede quemar un string entero en 6 meses.</li>
+          <li>Las aseguradoras y los fondos que invierten piden informes periódicos de estado del activo.</li>
+          <li>Sin seguimiento solo descubren un problema cuando ya han perdido meses de producción.</li>
+          <li>Quieren tranquilidad, no tener que decidir cuándo toca llamar al inspector.</li>
+        </ul>
+      </div>
+
+      <div class="deep-block">
+        <h3>Cómo funciona</h3>
+        <ul class="plain">
+          <li>Se firma un acuerdo anual con frecuencia definida (por ejemplo trimestral o semestral).</li>
+          <li>En cada ciclo: volamos nosotros, o vuela su operador, o una operadora aliada — da igual, todo entra por la misma plataforma.</li>
+          <li>Procesamos con el modelo entrenado específicamente para ese activo.</li>
+          <li>El cliente accede a una web donde ve: último estado, histórico, defectos nuevos vs anteriores, alertas automáticas.</li>
+        </ul>
+      </div>
+
+      <div class="deep-block">
+        <h3>Por qué nos funciona a nosotros</h3>
+        <ul class="plain">
+          <li>Ingresos previsibles mes a mes — el valor que nos hace una empresa, no un servicio.</li>
+          <li>Cada vuelo mejora el modelo específico de ese cliente → más precisión → más retención.</li>
+          <li>Barrera de salida natural: si se van a un competidor pierden su histórico y el modelo afinado.</li>
+          <li>Los datos acumulados también entrenan el modelo base — cada cliente nuevo arranca mejor que el anterior.</li>
+        </ul>
       </div>
     </div>
   </section>
