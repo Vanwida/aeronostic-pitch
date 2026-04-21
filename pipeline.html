@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aeronostic — Pipeline end-to-end · biblia v1</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #f7f5ef;
+    --surface: #ffffff;
+    --border: #e0ddd2;
+    --text: #10140f;
+    --text-muted: #5a5e56;
+    --text-faint: #8a8e85;
+    --accent: #0a6b52;
+    --accent-text: #0a3d2f;
+    --accent-soft: #e6efea;
+    --accent-border: #b8d4c7;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    padding: 48px 24px 80px;
+  }
+  .wrap { max-width: 1400px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 32px;
+    margin-bottom: 40px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+  .title-block { flex: 1; }
+  .title-block .kicker {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+  h1 {
+    font-size: clamp(28px, 3.4vw, 38px);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    max-width: 700px;
+  }
+
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .legend-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .legend-swatch {
+    width: 32px;
+    height: 20px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .legend-swatch.crit { background: #0a6b52; }
+  .legend-swatch.nec { background: #e6efea; border: 1.5px solid #0a6b52; }
+  .legend-swatch.evol {
+    background: #f7f5ef;
+    border: 1.5px dashed #c7c4b8;
+  }
+  .legend-name { font-weight: 600; color: var(--text); min-width: 110px; }
+  .legend-desc { color: var(--text-muted); }
+
+  .diagram-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 32px 24px;
+    overflow-x: auto;
+  }
+  svg { width: 100%; height: auto; display: block; min-width: 900px; }
+
+  .callouts {
+    margin-top: 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px;
+  }
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    padding: 16px 20px;
+  }
+  .callout .num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .callout .label {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  footer {
+    margin-top: 56px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--text-faint);
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <header>
+    <div class="title-block">
+      <div class="kicker">Aeronostic · Biblia del core product</div>
+      <h1>Pipeline state-of-the-art end-to-end.</h1>
+      <p class="subtitle">Del pre-vuelo al informe legal firmado, con ingesta multi-modal, synthgen híbrido, auto-labeling con VLM + SAM 3, training con modelos Apache 2.0, adapter por cliente y capas transversales. Todo lo visible tiene licencia auditada y propósito claro.</p>
+    </div>
+    <div class="legend">
+      <div class="legend-row">
+        <span class="legend-swatch crit"></span>
+        <span class="legend-name">Crítico</span>
+        <span class="legend-desc">bloquea facturación</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-swatch nec"></span>
+        <span class="legend-name">Necesario</span>
+        <span class="legend-desc">para escalar a múltiples clientes</span>
+      </div>
+      <div class="legend-row">
+        <span class="legend-swatch evol"></span>
+        <span class="legend-name">Evolutivo</span>
+        <span class="legend-desc">añade valor, no bloquea</span>
+      </div>
+    </div>
+  </header>
+
+  <div class="diagram-wrap">
+    <svg viewBox="0 0 1260 2080" role="img" aria-label="Pipeline end-to-end Aeronostic">
+      <defs>
+        <marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#0a6b52"/>
+        </marker>
+        <marker id="arr-mute" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#8a8e85"/>
+        </marker>
+      </defs>
+
+      <!-- ========== PRE-VUELO ========== -->
+      <text x="630" y="22" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">PRE-VUELO</text>
+
+      <rect x="100" y="40" width="340" height="60" rx="8" fill="#0a6b52"/>
+      <text x="270" y="64" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Planning de misión</text>
+      <text x="270" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">altura · overlap · GSD · KML · DJI Pilot 2</text>
+
+      <rect x="460" y="40" width="340" height="60" rx="8" fill="#0a6b52"/>
+      <text x="630" y="64" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Condiciones + calibración térmica</text>
+      <text x="630" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">meteo · sol · blackbody de referencia · checklist</text>
+
+      <rect x="820" y="40" width="340" height="60" rx="8" fill="#0a6b52"/>
+      <text x="990" y="64" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Permisos y compliance vuelo</text>
+      <text x="990" y="82" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">AESA · SORA · CTR · seguro RC · NOTAM</text>
+
+      <path d="M 630 100 L 630 130" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <!-- ========== INGESTA (ampliada: co-registro, radiometría, panel seg) ========== -->
+      <text x="630" y="152" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">INGESTA — entrada común multi-modal</text>
+
+      <rect x="460" y="168" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="192" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Vuelos reales · RGB + térmica (raw)</text>
+      <text x="630" y="210" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">upload resumable · dedup · encrypt · retention policy</text>
+
+      <path d="M 630 224 L 630 244" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="460" y="244" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="268" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Image quality gate</text>
+      <text x="630" y="286" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">rechaza fallos · blur · exposición · EXIF · re-fly hint</text>
+
+      <path d="M 630 300 L 630 320" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="460" y="320" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="344" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Co-registro RGB ↔ térmica</text>
+      <text x="630" y="362" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">alineación píxel-píxel · warp homográfico · cal interna</text>
+
+      <path d="M 630 376 L 630 396" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="460" y="396" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="420" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Mapeo radiométrico · px → °C absoluto</text>
+      <text x="630" y="438" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">calibración propagada · ΔT válido para IEC 62446-3</text>
+
+      <path d="M 630 452 L 630 472" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="460" y="472" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="496" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Georreferenciación + orthomosaic</text>
+      <text x="630" y="514" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">RTK/GPS · ODM / Pix4D · coregistro temporal</text>
+
+      <path d="M 630 528 L 630 548" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="460" y="548" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="572" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Panel segmentation + layout match</text>
+      <text x="630" y="590" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">rotated bbox · match KML · panel ID único</text>
+
+      <!-- Bifurcación: rama real a auto-labeling, semilla-real a synthgen -->
+      <path d="M 630 604 L 630 634" stroke="#0a6b52" stroke-width="1.8" fill="none"/>
+      <path d="M 630 634 L 280 634 L 280 664" stroke="#0a6b52" stroke-width="1.8" fill="none" stroke-dasharray="4,3" marker-end="url(#arr)"/>
+      <path d="M 630 634 L 990 634 L 990 664" stroke="#0a6b52" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+      <text x="340" y="626" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#5a5e56" font-style="italic">solo semilla</text>
+
+      <!-- ========== SYNTHGEN ========== -->
+      <text x="280" y="656" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#8a8e85" letter-spacing="1.5">SYNTHGEN — híbrido 80% prompt + 20% injection</text>
+
+      <rect x="130" y="664" width="300" height="56" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="280" y="688" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Perfil del dominio</text>
+      <text x="280" y="706" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">DINOv3 (Apache) · clustering · stats</text>
+
+      <path d="M 280 720 L 280 740" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="130" y="740" width="300" height="56" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="280" y="764" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Generación condicionada</text>
+      <text x="280" y="782" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#0a6b52">Nano Banana Pro · GPT Image 1.5 · FLUX.2 · multi-ref</text>
+
+      <path d="M 280 796 L 280 816" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="130" y="816" width="300" height="56" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="280" y="840" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Critic filter + FID/LPIPS</text>
+      <text x="280" y="858" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">CLIP distance · umbral · métrica objetiva</text>
+
+      <path d="M 280 872 L 280 892" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="130" y="892" width="300" height="72" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="280" y="914" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Output sintético dual</text>
+      <text x="280" y="932" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">80% prompt → auto-labeling</text>
+      <text x="280" y="947" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">20% injection → GT verificada + banco pruebas</text>
+
+      <!-- ========== AUTO-LABELING ========== -->
+      <text x="990" y="656" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#8a8e85" letter-spacing="1.5">AUTO-LABELING — etiquetar reales + sintéticos prompt</text>
+
+      <rect x="840" y="664" width="300" height="56" rx="8" fill="#0a6b52"/>
+      <text x="990" y="688" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">VLM detection</text>
+      <text x="990" y="706" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">Gemini 3 Flash · Gemma 4 · Claude Sonnet 4.6 fallback</text>
+
+      <path d="M 990 720 L 990 740" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="840" y="740" width="300" height="56" rx="8" fill="#0a6b52"/>
+      <text x="990" y="764" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">SAM 3 · segmentación open-vocab</text>
+      <text x="990" y="782" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">text + exemplar + visual prompt · Apache 2.0</text>
+
+      <path d="M 990 796 L 990 816" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <rect x="840" y="816" width="300" height="72" rx="8" fill="#0a6b52"/>
+      <text x="990" y="838" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">LLM-judge + active learning + 5% humano</text>
+      <text x="990" y="856" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">QA automático · uncertainty sampling · UI review</text>
+      <text x="990" y="871" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#ffffff" opacity="0.75">calibración confidence · inter-annotator agreement</text>
+
+      <!-- Synthgen → auto-labeling (80%) -->
+      <path d="M 280 964 C 430 1020, 670 960, 840 692" stroke="#0a6b52" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+      <text x="500" y="1012" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#0a6b52" font-style="italic">80% prompt → auto-labeling</text>
+
+      <!-- Synthgen injection → split estratificado (bypass auto-labeling) -->
+      <path d="M 280 964 L 280 1000 L 630 1000" stroke="#0a6b52" stroke-width="1.5" fill="none" stroke-dasharray="6,4"/>
+      <text x="430" y="992" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#0a6b52" font-style="italic">20% injection · GT verificada · banco pruebas</text>
+
+      <!-- Auto-labeling → split -->
+      <path d="M 990 888 L 990 1000 L 630 1000" stroke="#0a6b52" stroke-width="1.8" fill="none"/>
+      <path d="M 630 1000 L 630 1024" stroke="#0a6b52" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+
+      <!-- ========== SPLIT ESTRATIFICADO (bloque nuevo, antes de dataset) ========== -->
+      <text x="630" y="1044" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">SPLIT ESTRATIFICADO</text>
+
+      <rect x="380" y="1060" width="500" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="1084" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Split por cliente + tiempo + cluster</text>
+      <text x="630" y="1102" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">previene leakage · train / val / test · time-based · estratificado por defecto</text>
+
+      <path d="M 630 1116 L 630 1136" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <!-- ========== DATASET UNIFICADO ========== -->
+      <text x="630" y="1156" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">DATASET</text>
+
+      <rect x="380" y="1172" width="500" height="72" rx="8" fill="#0a6b52"/>
+      <text x="630" y="1196" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Dataset unificado versionado</text>
+      <text x="630" y="1214" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.8">sintético + real auto-labeled + humano · class balance</text>
+      <text x="630" y="1229" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.8">data lineage · DVC / LakeFS · PII scrubbing</text>
+
+      <path d="M 630 1244 L 630 1268" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <!-- ========== ENTRENAMIENTO ========== -->
+      <text x="630" y="1284" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">ENTRENAMIENTO BASE</text>
+
+      <rect x="230" y="1300" width="330" height="56" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="395" y="1324" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Augmentation runtime</text>
+      <text x="395" y="1342" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">albumentations · ruido · blur · flip</text>
+
+      <rect x="700" y="1300" width="330" height="56" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="865" y="1324" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Fine-tune detector (Apache 2.0)</text>
+      <text x="865" y="1342" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">RF-DETR / YOLOv12 / RT-DETR · multi-task loss</text>
+
+      <path d="M 560 1328 L 700 1328" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <path d="M 865 1356 L 865 1386" stroke="#0a6b52" stroke-width="1.8" fill="none" marker-end="url(#arr)"/>
+
+      <rect x="700" y="1386" width="330" height="56" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="865" y="1410" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Evaluación vs baseline</text>
+      <text x="865" y="1428" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">test held-out real · métrica € por FN crítico</text>
+
+      <!-- ========== ADAPTER PARALELO (bucle por cliente) ========== -->
+      <text x="270" y="1410" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#8a8e85" letter-spacing="1.5">PERSONALIZACIÓN POR CLIENTE · bucle paralelo</text>
+
+      <rect x="120" y="1420" width="340" height="72" rx="8" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="290" y="1442" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#0a3d2f">Adapter por cliente + drift</text>
+      <text x="290" y="1460" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">LoRA / PEFT · versionado · cold-start</text>
+      <text x="290" y="1475" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">trigger re-train · disposal GDPR</text>
+
+      <!-- Conexión base → adapter -->
+      <path d="M 700 1414 L 600 1414 L 600 1456 L 460 1456" stroke="#0a6b52" stroke-width="1.5" fill="none" marker-end="url(#arr)"/>
+
+      <!-- Continuación del flujo principal: base + adapter → impact → deploy -->
+      <path d="M 865 1442 L 865 1472" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <!-- ========== IMPACTO ECONÓMICO ========== -->
+      <text x="630" y="1492" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">MODELO DE IMPACTO</text>
+
+      <rect x="380" y="1508" width="500" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="1532" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Defecto → degradación → kWh → €</text>
+      <text x="630" y="1550" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">agregación eléctrica (string / combiner / inverter) · PPA / tarifa</text>
+
+      <path d="M 630 1564 L 630 1584" stroke="#0a6b52" stroke-width="1.8" marker-end="url(#arr)"/>
+
+      <!-- ========== DESPLIEGUE ========== -->
+      <text x="630" y="1600" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">DESPLIEGUE · ENTREGA AL CLIENTE</text>
+
+      <!-- Row 1 -->
+      <rect x="100" y="1614" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="270" y="1638" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Inferencia serving</text>
+      <text x="270" y="1656" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">GPU pool LRU · base + adapter · SLA latencia</text>
+
+      <rect x="460" y="1614" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="1638" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Tracking de defectos entre vuelos</text>
+      <text x="630" y="1656" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">diff · nuevo / empeorado / reparado · histórico</text>
+
+      <rect x="820" y="1614" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="990" y="1638" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Dashboard cliente</text>
+      <text x="990" y="1656" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">mapa · histórico · alertas · roles · CMMS API</text>
+
+      <!-- Row 2 -->
+      <rect x="100" y="1688" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="270" y="1712" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Report PDF firmado IEC</text>
+      <text x="270" y="1730" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">IEC 62446-3 · eIDAS · archivo 10 años · WORM</text>
+
+      <rect x="460" y="1688" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="630" y="1712" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Versioning + audit trail</text>
+      <text x="630" y="1730" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">reproducibilidad · model hash · immutable logs</text>
+
+      <rect x="820" y="1688" width="340" height="56" rx="8" fill="#0a6b52"/>
+      <text x="990" y="1712" text-anchor="middle" font-family="Inter" font-size="14" font-weight="600" fill="#ffffff">Exportables multi-formato</text>
+      <text x="990" y="1730" text-anchor="middle" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.75">CSV · Excel · PPT · API CMMS (SAP/Maximo)</text>
+
+      <!-- Feedback loop múltiple -->
+      <path d="M 1160 1642 C 1220 1642, 1220 692, 1140 692"
+            stroke="#8a8e85"
+            stroke-width="1.6"
+            fill="none"
+            stroke-dasharray="6,4"
+            marker-end="url(#arr-mute)"/>
+      <text x="1205" y="1180" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#8a8e85" letter-spacing="0.5" transform="rotate(-90, 1205, 1180)">vuelos nuevos · correcciones cliente · verificación campo</text>
+
+      <!-- Flecha adapter retroalimentación desde dashboard -->
+      <path d="M 100 1642 C 50 1642, 50 1456, 120 1456"
+            stroke="#8a8e85"
+            stroke-width="1.6"
+            fill="none"
+            stroke-dasharray="6,4"
+            marker-end="url(#arr-mute)"/>
+      <text x="40" y="1550" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#8a8e85" letter-spacing="0.5" transform="rotate(-90, 40, 1550)">correcciones cliente → adapter</text>
+
+      <!-- ========== CAPAS TRANSVERSALES ========== -->
+      <text x="630" y="1784" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">CAPAS TRANSVERSALES · aplican a todo el pipeline</text>
+
+      <rect x="100" y="1800" width="1060" height="44" rx="6" fill="#0a6b52"/>
+      <text x="120" y="1819" text-anchor="start" font-family="Inter" font-size="13" font-weight="600" fill="#ffffff">OBSERVABILIDAD</text>
+      <text x="120" y="1835" text-anchor="start" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.8">logging centralizado · OpenTelemetry tracing · métricas producto · alerting pager · SLA/SLO · dashboards internos · incident runbooks</text>
+
+      <rect x="100" y="1852" width="1060" height="44" rx="6" fill="#e6efea" stroke="#0a6b52" stroke-width="1.5"/>
+      <text x="120" y="1871" text-anchor="start" font-family="Inter" font-size="13" font-weight="600" fill="#0a3d2f">MLOPS</text>
+      <text x="120" y="1887" text-anchor="start" font-family="JetBrains Mono" font-size="11" fill="#0a6b52">W&amp;B experiment tracking · CI/CD modelos · shadow deploy · champion-challenger · model registry · A/B testing</text>
+
+      <rect x="100" y="1904" width="1060" height="44" rx="6" fill="#0a6b52"/>
+      <text x="120" y="1923" text-anchor="start" font-family="Inter" font-size="13" font-weight="600" fill="#ffffff">COMPLIANCE · LEGAL · AISLAMIENTO</text>
+      <text x="120" y="1939" text-anchor="start" font-family="JetBrains Mono" font-size="11" fill="#ffffff" opacity="0.8">GDPR · NIS2 · SOC 2 · eIDAS · DPA · tenancy aislado · keys por cliente · residencia UE · RC profesional · cyber · IP</text>
+
+      <!-- ========== EVOLUTIVO (antes Futuro, sin tiempo) ========== -->
+      <text x="630" y="1978" text-anchor="middle" font-family="JetBrains Mono" font-size="12" fill="#8a8e85" letter-spacing="2">EVOLUTIVO · valor añadido, no bloquea</text>
+
+      <rect x="60" y="1994" width="280" height="60" rx="8" fill="#f7f5ef" stroke="#c7c4b8" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <text x="200" y="2020" text-anchor="middle" font-family="Inter" font-size="13" font-weight="600" fill="#5a5e56">Foundation model propio</text>
+      <text x="200" y="2038" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#8a8e85">cuando dataset &gt; 1M imgs aéreas</text>
+
+      <rect x="360" y="1994" width="280" height="60" rx="8" fill="#f7f5ef" stroke="#c7c4b8" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <text x="500" y="2020" text-anchor="middle" font-family="Inter" font-size="13" font-weight="600" fill="#5a5e56">Edge inference en dron</text>
+      <text x="500" y="2038" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#8a8e85">Jetson · filtro in-flight · BVLOS</text>
+
+      <rect x="660" y="1994" width="280" height="60" rx="8" fill="#f7f5ef" stroke="#c7c4b8" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <text x="800" y="2020" text-anchor="middle" font-family="Inter" font-size="13" font-weight="600" fill="#5a5e56">Drone-in-a-box autónomo</text>
+      <text x="800" y="2038" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#8a8e85">DJI Dock 2 · misión sin piloto</text>
+
+      <rect x="960" y="1994" width="280" height="60" rx="8" fill="#f7f5ef" stroke="#c7c4b8" stroke-width="1.5" stroke-dasharray="5,4"/>
+      <text x="1100" y="2020" text-anchor="middle" font-family="Inter" font-size="13" font-weight="600" fill="#5a5e56">Agent orchestration</text>
+      <text x="1100" y="2038" text-anchor="middle" font-family="JetBrains Mono" font-size="10" fill="#8a8e85">asset manager agent · auto-reporting</text>
+
+    </svg>
+  </div>
+
+  <div class="callouts">
+    <div class="callout">
+      <div class="num">Apache 2.0</div>
+      <div class="label">todos los modelos autohospedados: RF-DETR · YOLOv12 · SAM 3 · DINOv3 · Gemma 4 · libertad comercial total</div>
+    </div>
+    <div class="callout">
+      <div class="num">IEC 62446-3</div>
+      <div class="label">radiometría propagada · ΔT válido · informe firmado eIDAS · archivo 10 años</div>
+    </div>
+    <div class="callout">
+      <div class="num">Defecto → €</div>
+      <div class="label">modelo de impacto económico · agregación eléctrica · tarifa del cliente · entrega €/año recuperables</div>
+    </div>
+    <div class="callout">
+      <div class="num">Adapter</div>
+      <div class="label">bucle paralelo por cliente · LoRA/PEFT · drift detection · disposal GDPR · cold-start</div>
+    </div>
+  </div>
+
+  <footer>
+    <div>Aeronostic · pipeline state-of-the-art · biblia v1</div>
+    <div>Abril 2026</div>
+  </footer>
+
+</main>
+</body>
+</html>
